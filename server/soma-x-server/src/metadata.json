@@ -1,0 +1,101 @@
+[
+  {
+    "type": "folder",
+    "path": "Community",
+    "name": "Community",
+    "children": [
+      {
+        "type": "folder",
+        "path": "Community/audio",
+        "name": "Audio",
+        "children": []
+      },
+      {
+        "type": "folder",
+        "path": "Community/book",
+        "name": "Book",
+        "children": [
+          {
+            "type": "file",
+            "name": "Advanced Mathematics S6 SB.pdf",
+            "path": "Community/book/Advanced Mathematics S6 SB.pdf",
+            "size": 11724727
+          },
+          {
+            "type": "file",
+            "name": "Biology S6 Student Book .pdf",
+            "path": "Community/book/Biology S6 Student Book .pdf",
+            "size": 34299502
+          },
+          {
+            "type": "file",
+            "name": "Chemistry S6 SB.pdf",
+            "path": "Community/book/Chemistry S6 SB.pdf",
+            "size": 19936350
+          }
+        ]
+      },
+      {
+        "type": "folder",
+        "path": "Community/video",
+        "name": "Video",
+        "children": []
+      }
+    ]
+  },
+  {
+    "type": "folder",
+    "path": "General Resources",
+    "name": "General Resources",
+    "children": []
+  },
+  {
+    "type": "folder",
+    "path": "Leadership",
+    "name": "Leadership",
+    "children": []
+  },
+  {
+    "type": "folder",
+    "path": "Multimedia Library",
+    "name": "Multimedia Library",
+    "children": []
+  },
+  {
+    "type": "folder",
+    "path": "Student Resources",
+    "name": "Student Resources",
+    "children": [
+      {
+        "type": "file",
+        "name": "Advanced Mathematics S6 SB.pdf",
+        "path": "Student Resources/Advanced Mathematics S6 SB.pdf",
+        "size": 11724727
+      },
+      {
+        "type": "file",
+        "name": "Biology S6 Student Book .pdf",
+        "path": "Student Resources/Biology S6 Student Book .pdf",
+        "size": 34299502
+      },
+      {
+        "type": "file",
+        "name": "Chemistry S6 SB.pdf",
+        "path": "Student Resources/Chemistry S6 SB.pdf",
+        "size": 19936350
+      },
+      {
+        "type": "file",
+        "name": "Rwanda Eduication Board¦P 6¦English¦unit 8; Environment ¦lesson; describe the map of western provinc (720p_6fps_H264 128kbit_AAC).mp4",
+        "path": "Student Resources/Rwanda Eduication Board¦P 6¦English¦unit 8; Environment ¦lesson; describe the map of western provinc (720p_6fps_H264-128kbit_AAC).mp4",
+        "size": 32333329
+      }
+    ]
+  },
+  {
+    "type": "folder",
+    "path": "Teacher Development",
+    "name": "Teacher Development",
+    "children": []
+  }
+]
