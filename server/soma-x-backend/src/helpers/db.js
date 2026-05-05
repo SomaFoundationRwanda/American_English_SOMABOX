@@ -5,23 +5,28 @@ import { config } from "../config/index.js";
 
 const CONTENT_DIR = config.paths.rwandanEducation;
 
-// --- category queries ---
-const insertCategory = serverDb.prepare(`
+// --- lazy statement preparation ---
+let _insertCategory, _getCategory, _insertContent, _getContent;
+
+const getInsertCategory = () => _insertCategory || (_insertCategory = serverDb.prepare(`
   INSERT INTO categories (title, subtitle, parent_id, path_key, is_main, is_disabled, tags)
   VALUES (?, ?, ?, ?, ?, ?, ?)
-`);
-const getCategory = serverDb.prepare(`SELECT id FROM categories WHERE path_key = ?`);
-const insertContent = serverDb.prepare(`
+`));
+
+const getGetCategory = () => _getCategory || (_getCategory = serverDb.prepare(`SELECT id FROM categories WHERE path_key = ?`));
+
+const getInsertContent = () => _insertContent || (_insertContent = serverDb.prepare(`
   INSERT INTO content_items
   (category_id, title, subtitle, type, url, path_key, size, duration, pages, is_disabled, video_url, pdf_url, tags)
   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-`);
-const getContent = serverDb.prepare(`SELECT id FROM content_items WHERE path_key = ?`);
+`));
+
+const getGetContent = () => _getContent || (_getContent = serverDb.prepare(`SELECT id FROM content_items WHERE path_key = ?`));
 
 function ensureCategory(name, parentId = null, relativePath = "", isMain = false, isDisabled = false) {
-  const row = getCategory.get(relativePath);
+  const row = getGetCategory().get(relativePath);
   if (row) return row.id;
-  return insertCategory.run(
+  return getInsertCategory().run(
     name.replace(/-/g, " "),
     "",
     parentId,
@@ -33,7 +38,7 @@ function ensureCategory(name, parentId = null, relativePath = "", isMain = false
 }
 
 function insertFileContent(file, categoryId, type, relativePath, filePath) {
-  if (getContent.get(relativePath)) return; // skip existing
+  if (getGetContent().get(relativePath)) return; // skip existing
 
   const stat = fs.statSync(filePath);
   const metadataPath = filePath.replace(path.extname(filePath), ".json");

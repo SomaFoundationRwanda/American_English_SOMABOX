@@ -38,28 +38,24 @@ export async function initSchemas() {
         console.log("Initializing Server DB with master schema...");
         serverDb.exec(schema);
 
-        // Initialize setup status - bypass by default
-        serverDb.prepare('INSERT OR IGNORE INTO system_settings (key, value) VALUES (?, ?)').run('setup_done', '1');
+        // Initialize setup status - set to 0 to trigger onboarding
+        serverDb.prepare('INSERT OR IGNORE INTO system_settings (key, value) VALUES (?, ?)').run('setup_done', '0');
 
-        console.log(`System initialized.`);
+        console.log(`System initialized. Onboarding required.`);
     }
 
-    // Ensure Hardcoded admin account exists
-    const adminExists = serverDb.prepare('SELECT 1 FROM users WHERE email = ?').get('admin@sfr.org');
-    if (!adminExists) {
-        console.log("Creating hardcoded admin account...");
-        const hashedPassword = await bcrypt.hash('Admin123', 10);
-        serverDb.prepare(`
-            INSERT INTO users (email, password_hash, role) 
-            VALUES (?, ?, ?)
-        `).run('admin@sfr.org', hashedPassword, 'admin');
-        console.log("Admin account admin@sfr.org created.");
-    } else {
-        console.log("Admin account admin@sfr.org already exists.");
+    // Check if any admin exists. If not, ensure setup_done is 0
+    const adminCount = serverDb.prepare('SELECT COUNT(*) as count FROM users WHERE role = ?').get('admin').count;
+    if (adminCount === 0) {
+        serverDb.prepare('UPDATE system_settings SET value = ? WHERE key = ?').run('0', 'setup_done');
     }
 
     // Migration logic for AE fields (Resource Pair)
     const addMissingColumns = (db, table, columns) => {
+        // Check if table exists
+        const tableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?").get(table);
+        if (!tableExists) return;
+
         const info = db.prepare(`PRAGMA table_info(${table})`).all();
         const existing = info.map(c => c.name);
         for (const col of columns) {
@@ -70,12 +66,7 @@ export async function initSchemas() {
         }
     };
 
-    addMissingColumns(serverDb, 'categories', ['tags', 'body']);
-    addMissingColumns(serverDb, 'content_items', ['video_url', 'pdf_url', 'tags', 'body', 'audio_url', 'thumbnail_url']);
-    addMissingColumns(localDb, 'categories', ['tags', 'body']);
-    addMissingColumns(localDb, 'content_items', ['video_url', 'pdf_url', 'tags', 'body', 'audio_url', 'thumbnail_url']);
-
-    // 2. Initialize Local DB (Custom Content)
+    // 2. Initialize Local DB (Custom Content) - DO THIS FIRST
     localDb.exec(`
         CREATE TABLE IF NOT EXISTS categories (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -114,6 +105,12 @@ export async function initSchemas() {
             FOREIGN KEY (category_id) REFERENCES categories(id)
         );
     `);
+
+    // 3. Run Migrations
+    addMissingColumns(serverDb, 'categories', ['tags', 'body']);
+    addMissingColumns(serverDb, 'content_items', ['video_url', 'pdf_url', 'tags', 'body', 'audio_url', 'thumbnail_url']);
+    addMissingColumns(localDb, 'categories', ['tags', 'body']);
+    addMissingColumns(localDb, 'content_items', ['video_url', 'pdf_url', 'tags', 'body', 'audio_url', 'thumbnail_url']);
 
     // Ensure root category in local DB
     const rootPath = config.defaults.customContentRoot;

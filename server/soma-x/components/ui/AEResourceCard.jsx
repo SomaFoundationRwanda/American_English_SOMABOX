@@ -34,7 +34,7 @@ const AEResourceCard = ({ item, onPlay, onOpenResource, isEditable, onChange, on
                                 className="flex-1 bg-white border-slate-200 rounded-xl h-12 font-bold text-[10px] uppercase tracking-widest text-[#00274c] hover:bg-slate-100 transition-all border-dashed"
                                 onClick={() => document.getElementById(`upload-thumb-${item.id}`).click()}
                             >
-                                {item.thumbnail_url ? 'Change Thumbnail' : 'Upload Thumbnail'}
+                                {item.thumbnail_url ? 'Override Thumbnail' : 'Custom Thumbnail'}
                             </Button>
                             <input
                                 id={`upload-thumb-${item.id}`}
@@ -44,11 +44,10 @@ const AEResourceCard = ({ item, onPlay, onOpenResource, isEditable, onChange, on
                                 onChange={(e) => onChange({ ...item, _uploadFile: e.target.files[0], _uploadType: 'thumbnail' })}
                             />
                         </div>
-                        {item.thumbnail_url && (
-                            <div className="text-[9px] text-emerald-600 font-black uppercase tracking-widest flex items-center gap-1">
-                                <span className="h-1 w-1 bg-emerald-500 rounded-full" /> Local Asset Linked
-                            </div>
-                        )}
+                        <div className="text-[9px] text-slate-400 font-black uppercase tracking-widest flex items-center gap-1">
+                            <span className="h-1.5 w-1.5 bg-blue-500 rounded-full animate-pulse" /> 
+                            {item.thumbnail_url ? 'Active' : 'Auto-generated on upload'}
+                        </div>
                     </div>
 
                     <div className="space-y-2">

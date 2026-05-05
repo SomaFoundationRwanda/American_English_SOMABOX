@@ -12,29 +12,56 @@ import { serverDb } from '../helpers/db-manager.js';
 
 const router = express.Router();
 
+router.get('/setup-status', (req, res) => {
+    try {
+        const setupDone = serverDb.prepare('SELECT value FROM system_settings WHERE key = ?').get('setup_done');
+        return res.json({ setup_done: setupDone?.value === '1' });
+    } catch (error) {
+        console.error('Setup status check error:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+router.post('/setup', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password required' });
+        }
+
+        // Check if already setup
+        const setupDone = serverDb.prepare('SELECT value FROM system_settings WHERE key = ?').get('setup_done');
+        if (setupDone?.value === '1') {
+            return res.status(400).json({ message: 'System already setup' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        // Use a transaction to ensure both user creation and setup status update succeed
+        const transaction = serverDb.transaction(() => {
+            serverDb.prepare(`
+                INSERT INTO users (email, password_hash, role) 
+                VALUES (?, ?, ?)
+            `).run(email, hashedPassword, 'admin');
+
+            serverDb.prepare('UPDATE system_settings SET value = ? WHERE key = ?').run('1', 'setup_done');
+        });
+
+        transaction();
+
+        return res.json({ message: 'Setup successful' });
+    } catch (error) {
+        console.error('Setup error:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
 router.post('/login', async (req, res) => {
     try {
         const { username, password, role } = req.body;
 
         if (!username || !password) {
             return res.status(400).json({ message: 'Username and password required' });
-        }
-
-        // Emergency Fallback for Hardcoded Admin
-        if (username === 'admin@sfr.org' && password === 'Admin123') {
-            const adminRow = serverDb.prepare('SELECT * FROM users WHERE email = ?').get('admin@sfr.org');
-            if (adminRow) {
-                console.log("Fallback login successful for admin@sfr.org");
-                return res.json({
-                    message: 'Login successful',
-                    user: {
-                        id: adminRow.id,
-                        username: 'admin@sfr.org',
-                        role: 'admin',
-                        created_at: adminRow.created_at
-                    }
-                });
-            }
         }
 
         const row = serverDb.prepare('SELECT * FROM users WHERE email = ?').get(username);

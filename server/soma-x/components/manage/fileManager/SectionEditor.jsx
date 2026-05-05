@@ -133,7 +133,26 @@ const SectionEditor = () => {
                     pdf: 'pdf_url'
                 };
                 const field = fieldMap[type];
-                const updatedItem = { ...item, [field]: data.path };
+                let updatedItem = { ...item, [field]: data.path };
+                
+                // If backend provided an automatic thumbnail, use it
+                // Logic: Prioritize manual > video > PDF/Books
+                if (data.thumbnail_url) {
+                    if (type === 'thumbnail') {
+                        // Manual override always wins
+                        updatedItem.thumbnail_url = data.thumbnail_url;
+                    } else if (type === 'video') {
+                        // Videos take precedence over auto-generated PDF thumbs
+                        updatedItem.thumbnail_url = data.thumbnail_url;
+                    } else if (type === 'pdf' && !item.video_url && !item.thumbnail_url) {
+                        // Only use PDF thumb if no video and no existing manual thumb
+                        updatedItem.thumbnail_url = data.thumbnail_url;
+                    } else if (!updatedItem.thumbnail_url) {
+                        // Final fallback
+                        updatedItem.thumbnail_url = data.thumbnail_url;
+                    }
+                }
+
                 delete updatedItem._uploadFile;
                 delete updatedItem._uploadType;
 

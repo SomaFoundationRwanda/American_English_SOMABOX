@@ -58,17 +58,18 @@ export default function SomaboxNav() {
       {/* the navigation for computers */}
       <nav className="w-fit max-w-22 fixed hidden bg-accent-dark min-h-screen md:flex flex-col items-center py-6">
         {/* Strategic Partners Logos */}
-        <div className="mb-4 flex flex-col items-center gap-4 px-2">
+        <Link href="/" className="mb-4 flex flex-col items-center gap-4 px-2 hover:opacity-80 transition-opacity">
           <div className="bg-white/10 rounded-xl p-2 flex flex-col items-center gap-3">
             <Image width={60} height={60} className="min-w-[60px] object-contain" src="/images/SFR/Soma-Foundation-logo.png" alt="Soma Foundation" />
             <div className="w-full h-px bg-white/10" />
             <Image width={50} height={50} className="min-w-[50px] object-contain" src="/images/US/RELO-LOGO-Color-01-1131x800.png" alt="RELO Logo" />
+            <Image width={50} height={50} className="min-w-[50px] object-contain" src="/images/US/logo-igire.png" alt="Igire Logo" />
             <Image width={50} height={50} className="min-w-[50px] object-contain" src="/images/US/logo-US-Embassy.png" alt="US Embassy Logo" />
           </div>
           <Typography color="white" size="xs" weight="bold" className="opacity-40 uppercase tracking-widest text-[8px] text-center">
             Strategic Partners
           </Typography>
-        </div>
+        </Link>
 
         {/* Navigation Items */}
         <div className="flex flex-col mt-3 flex-1 w-full">
@@ -92,7 +93,9 @@ export default function SomaboxNav() {
             );
           })}
         </div>
-        <img className="w-full" src="/somabox-logo-1.png" alt="this is the logo" />
+        <Link href="/" className="w-full hover:opacity-80 transition-opacity">
+          <img className="w-full" src="/somabox-logo-1.png" alt="this is the logo" />
+        </Link>
       </nav>
 
       {/* the navigation for small screens */}

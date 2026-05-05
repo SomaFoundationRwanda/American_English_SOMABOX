@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowRight, Globe, Lock, Shield, Zap, BookOpen, Mic, MonitorPlay } from 'lucide-react';
 import Typography from '@/components/ui/Typography';
 import { Button } from '@/components/ui/button';
+import OnboardingModal from '@/components/onboarding/OnboardingModal';
 
 export default function LandingPage() {
     const contentSources = [
@@ -22,6 +23,7 @@ export default function LandingPage() {
 
     return (
         <div className="min-h-screen bg-white font-sans text-slate-800">
+            <OnboardingModal />
             {/* Top Bar - Institutional Style */}
             <div className="bg-[#00274c] text-white py-2 px-8 flex justify-between items-center text-[11px] font-bold tracking-widest uppercase border-b border-white/10">
                 <div className="flex gap-4">
@@ -41,6 +43,7 @@ export default function LandingPage() {
                     <div className="h-10 w-[1px] bg-slate-200 mx-1" />
                     <div className="flex items-center gap-4">
                         <img src="/images/US/logo-US-Embassy.png" alt="US Embassy" className="h-12 w-auto object-contain" />
+                        <img src="/images/US/logo-igire.png" alt="Igire" className="h-10 w-auto object-contain" />
                         <img src="/images/US/RELO-LOGO-Color-01-1131x800.png" alt="RELO" className="h-10 w-auto object-contain" />
                     </div>
                 </div>
@@ -93,6 +96,10 @@ export default function LandingPage() {
                     <div className="flex flex-col items-center gap-3">
                         <img src="/images/US/logo-US-Embassy.png" alt="U.S. Embassy" className="h-16 w-auto" />
                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">U.S. Embassy</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-3">
+                        <img src="/images/US/logo-igire.png" alt="Igire" className="h-16 w-auto" />
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Igire</span>
                     </div>
                     <div className="flex flex-col items-center gap-3">
                         <img src="/images/US/RELO-LOGO-Color-01-1131x800.png" alt="RELO" className="h-14 w-auto" />
@@ -221,9 +228,10 @@ export default function LandingPage() {
                             <p className="text-slate-400 text-lg leading-relaxed mb-10 font-medium">
                                 Building the infrastructure for a more equitable digital future, one offline server at a time.
                             </p>
-                            <div className="flex gap-4">
-                                <img src="/images/US/logo-US-Embassy.png" alt="Embassy" className="h-10 opacity-50 grayscale" />
-                                <img src="/images/US/RELO-LOGO-Color-01-1131x800.png" alt="RELO" className="h-8 opacity-50 grayscale" />
+                            <div className="flex gap-4 items-center">
+                                <img src="/images/US/logo-US-Embassy.png" alt="Embassy" className="h-10 opacity-50 grayscale hover:grayscale-0 transition-all" />
+                                <img src="/images/US/logo-igire.png" alt="Igire" className="h-10 opacity-50 grayscale hover:grayscale-0 transition-all" />
+                                <img src="/images/US/RELO-LOGO-Color-01-1131x800.png" alt="RELO" className="h-8 opacity-50 grayscale hover:grayscale-0 transition-all" />
                             </div>
                         </div>
 

@@ -5,6 +5,7 @@ import multer from "multer";
 import { serverDb, localDb, initSchemas } from "../helpers/db-manager.js";
 import { config } from "../config/index.js";
 import { mainCategoriesCache, summaryDataCache, hydrateCaches } from "../data/cache/index.js";
+import { generateThumbnail } from "../helpers/thumbnail-manager.js";
 
 const router = express.Router();
 const CONTENT_DIR = config.paths.content;
@@ -256,7 +257,7 @@ router.post("/manager/create-folder", express.json(), (req, res) => {
     }
 });
 
-router.post("/manager/upload-asset", assetUpload.single("file"), (req, res) => {
+router.post("/manager/upload-asset", assetUpload.single("file"), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ error: "No file provided" });
 
@@ -264,10 +265,22 @@ router.post("/manager/upload-asset", assetUpload.single("file"), (req, res) => {
         const subDir = type === 'thumbnail' ? 'thumbnails' : (type === 'video' ? 'videos' : 'resources');
         const relativePath = `/${DEFAULT_ROOT}/assets/${subDir}/${req.file.filename}`;
 
+        let autoThumbnail = null;
+        if (type === 'video' || type === 'pdf') {
+            try {
+                const physicalPath = path.join(CONTENT_DIR, DEFAULT_ROOT, 'assets', subDir, req.file.filename);
+                autoThumbnail = await generateThumbnail(physicalPath);
+                console.log(`Auto-generated thumbnail for ${type}: ${autoThumbnail}`);
+            } catch (err) {
+                console.error(`Auto-thumbnail generation failed for ${type}:`, err);
+            }
+        }
+
         res.status(201).json({
             ok: true,
             path: relativePath,
-            filename: req.file.filename
+            filename: req.file.filename,
+            thumbnail_url: autoThumbnail
         });
     } catch (e) {
         console.error(e);
@@ -275,7 +288,7 @@ router.post("/manager/upload-asset", assetUpload.single("file"), (req, res) => {
     }
 });
 
-router.post("/manager/upload", upload.single("file"), (req, res) => {
+router.post("/manager/upload", upload.single("file"), async (req, res) => {
     try {
         const { path: relPath, type } = req.body;
         const safePath = (relPath || DEFAULT_ROOT).replace(/^\/+|\/+$/g, "");
@@ -301,12 +314,32 @@ router.post("/manager/upload", upload.single("file"), (req, res) => {
         }
 
         const stat = fs.statSync(physicalPath);
-        const info = localDb.prepare(`
-            INSERT INTO content_items (category_id, title, subtitle, type, url, path_key, size, duration, pages, is_disabled)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
-        `).run(parent.id, filename.replace(/-/g, " "), "", (type || "book").toLowerCase(), `/${pathKey}`, pathKey, stat.size, null, null);
+        
+        // --- Automatic Thumbnail Generation ---
+        let autoThumbnail = null;
+        try {
+            autoThumbnail = await generateThumbnail(physicalPath);
+        } catch (err) {
+            console.error("Auto thumbnail generation failed:", err);
+        }
 
-        res.status(201).json({ id: info.lastInsertRowid, title: filename, path_key: pathKey });
+        const info = localDb.prepare(`
+            INSERT INTO content_items (category_id, title, subtitle, type, url, path_key, size, duration, pages, is_disabled, thumbnail_url)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)
+        `).run(
+            parent.id, 
+            filename.replace(/-/g, " "), 
+            "", 
+            (type || "book").toLowerCase(), 
+            `/${pathKey}`, 
+            pathKey, 
+            stat.size, 
+            null, 
+            null,
+            autoThumbnail
+        );
+
+        res.status(201).json({ id: info.lastInsertRowid, title: filename, path_key: pathKey, thumbnail_url: autoThumbnail });
     } catch (e) {
         console.error(e);
         res.status(500).json({ error: "Upload failed" });
